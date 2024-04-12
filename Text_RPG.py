@@ -61,8 +61,6 @@ button_rect = pygame.Rect(150, 200, button_width, button_height)
 text = "Attack"
 text_color = (255, 255, 255)
 
-
-
 # Ability
 button_width_2 = 150
 button_height_2 = 50
@@ -117,6 +115,8 @@ text_color_6 = (176, 26, 26)
 text_choose = game_font.render("Choose a class:", True, (255, 255, 255))
 text_cont = game_font.render("Space", True, (255, 255, 255))
 
+
+
 show_button = True
 run = True
 hp_show = False
@@ -134,6 +134,7 @@ active_message_11_playing = False
 player_dead = False
 shield_bash = False
 cooldown = False
+enemyhp_show = False
 
 def generate_attack_message(player_attack):
     return "The " + str(selected_enemy) + " has taken " + str(player_attack) + " DMG!"
@@ -173,7 +174,7 @@ while run:
                     text_2 = "Shield Bash"
                     button_width_2 = 225
                     button_height_2 = 50
-                    button_rect_2 = pygame.Rect(450, 200, button_width_2, button_height_2)
+                    button_rect_2 = pygame.Rect(485, 200, button_width_2, button_height_2)
                     ready = True
                     space_prompt = True
 
@@ -239,6 +240,7 @@ while run:
                 enemy_turn = False
                 encounter = True
                 act_1 = False
+                enemyhp_show = True
 
             # Attacks
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -247,14 +249,10 @@ while run:
                 active_message = 3
                 message = messages[active_message]
                 counter = 0
-                player_attack = random.randint(5, 10)
-                enemyhp -= player_attack
-                print(enemyhp)
                 space_prompt = True
                 attack_message_shown = True
-                messages[10] = generate_attack_message(player_attack)
-                player_turn = True
-                enemy_turn = False
+                player_turn = False
+                enemy_turn = True
                 act_1 = False
 
                 if enemyhp < 1:
@@ -268,25 +266,28 @@ while run:
                             active_message = 13
                             message = messages[active_message]
                             counter = 0
-
+            # Remove?
             if button_rect.collidepoint(event.pos) and archer and player_turn and not enemy_turn:
                 active_message = 3
                 message = messages[active_message]
                 counter = 0
-                player_attack = random.randint(10, 15)
-                enemyhp -= player_attack
-                print(enemyhp)
                 space_prompt = True
                 attack_message_shown = True
-                messages[10] = generate_attack_message(player_attack)
                 player_turn = True
                 enemy_turn = False
                 act_1 = False
 
         if event.type == pygame.KEYDOWN:
-            if player_turn and attack_message_shown:
+            if space_prompt and attack_message_shown:
                 if event.key == pygame.K_SPACE:
                     # Display message for damage dealt to enemy
+                    if knight:
+                        player_attack = random.randint(5, 10)
+                    elif archer:
+                        player_attack = random.randint(10, 15)
+                    enemyhp -= player_attack
+                    print(enemyhp)
+                    messages[10] = generate_attack_message(player_attack)
                     active_message = 10
                     message = messages[active_message]
                     counter = 0
@@ -338,8 +339,10 @@ while run:
                 counter = 0
                 shield_bash = True
                 space_prompt = True
+                player_turn = False
 
-            if button_rect_2.collidepoint(event.pos) and cooldown:
+
+            if button_rect_2.collidepoint(event.pos) and cooldown and player_turn:
                 active_message = 15
                 message = messages[active_message]
                 counter = 0
@@ -417,7 +420,13 @@ while run:
     if hp_show:
         text_hp = game_font.render("HP: " + str(player_hp), True, (255, 255, 255))
         screen.blit(text_hp, (50, 425))
-
+    if enemyhp_show:
+        enemy_text_hp = game_font.render("HP: " + str(enemyhp), True, (214, 4, 4))
+        screen.blit(enemy_text_hp, (350, 130))
+    if enemyhp < 1:
+        enemy_text_hp = game_font.render("SLAIN", True, (214, 4, 4))
+        screen.blit(enemy_text_hp, (350, 130))
+        enemyhp_show = False
 
     if not player_dead:
         # Attack button
