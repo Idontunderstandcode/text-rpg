@@ -30,8 +30,8 @@ messages = ['Select a class from below',
             'You have chosen the knight',
             'You have chosen the archer',
             'You chose to attack!',
-            'You chose to shield bash!',
-            'You chose to use Twin Fangs!',
+            'You chose to Shield Bash!',
+            'You chose to use Gemini Salvo!',
             'Are you ready to start the run?',
             'Bold of you to assume you had a choice',
             'ACT 1',
@@ -115,8 +115,6 @@ text_color_6 = (176, 26, 26)
 text_choose = game_font.render("Choose a class:", True, (255, 255, 255))
 text_cont = game_font.render("Space", True, (255, 255, 255))
 
-
-
 show_button = True
 run = True
 hp_show = False
@@ -137,6 +135,8 @@ shield_bash = False
 double_shot = False
 cooldown = False
 enemyhp_show = False
+new_enemy = False
+attack_valid = False
 
 def generate_attack_message(player_attack):
     return "The " + str(selected_enemy) + " has taken " + str(player_attack) + " DMG!"
@@ -190,7 +190,7 @@ while run:
                     player_hp =+ archer_hp
                     hp_show = True
                     archer = True
-                    text_2 = "Twin Fangs"
+                    text_2 = "Gemini Salvo"
                     button_width_2 = 200
                     button_height_2 = 50
                     button_rect_2 = pygame.Rect(475, 200, button_width_2, button_height_2)
@@ -258,18 +258,25 @@ while run:
                 player_turn = False
                 enemy_turn = True
                 act_1 = False
+                attack_valid = True
 
                 if enemyhp < 1:
+                    enemy_dead = True
                     enemy_attack = 0
                     active_message = 10
+                    attack_message_shown = True
                     message = messages[active_message]
                     counter = 0
                     space_prompt = True
+
                     if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_SPACE:
+                        if event.key == pygame.K_SPACE and attack_message_shown and not new_enemy and active_message == 10:
                             active_message = 13
                             message = messages[active_message]
                             counter = 0
+                            attack_message_shown = False
+                            new_enemy = True
+
             # Remove?
             if button_rect.collidepoint(event.pos) and archer and player_turn and not enemy_turn:
                 active_message = 3
@@ -281,8 +288,9 @@ while run:
                 enemy_turn = False
                 act_1 = False
 
+
         if event.type == pygame.KEYDOWN:
-            if space_prompt and attack_message_shown:
+            if space_prompt and attack_message_shown and attack_valid:
                 if event.key == pygame.K_SPACE:
                     # Display message for damage dealt to enemy
                     if knight:
@@ -330,31 +338,41 @@ while run:
                 message = messages[active_message]
                 counter = 0
                 space_prompt = True
+
                 if event.type == pygame.KEYDOWN:
-                    if event.key == pygame.K_SPACE and attack_message_shown:
+                    if event.key == pygame.K_SPACE and attack_message_shown and not new_enemy and active_message == 10:
                         active_message = 13
                         message = messages[active_message]
                         counter = 0
                         attack_message_shown = False
+                        new_enemy = True
 
-        if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and enemy_dead and space_prompt and not attack_message_shown and active_message == 13:
-                active_message = 9
-                message = messages[active_message]
-                counter = 0
-                space_prompt = False
-                player_turn = True
-                enemy_turn = False
-                encounter = True
-                act_1 = False
-                enemyhp_show = True
-                selected_enemy = random.choice(enemies)
-                if selected_enemy == "Troll":
-                    enemyhp = 30
-                elif selected_enemy == "Goblin":
-                    enemyhp = 15
-                elif selected_enemy == "Bandit":
-                    enemyhp = 20
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and attack_message_shown and not new_enemy:
+                    if active_message == 10:
+                        active_message = 13
+                        message = messages[active_message]
+                        counter = 0
+                        attack_message_shown = False
+                        new_enemy = True
+                    elif active_message == 13:
+                        active_message = 9
+                        message = messages[active_message]
+                        counter = 0
+                        space_prompt = False
+                        player_turn = True
+                        enemy_turn = False
+                        encounter = True
+                        act_1 = False
+                        enemyhp_show = True
+                        selected_enemy = random.choice(enemies)
+                        if selected_enemy == "Troll":
+                            enemyhp = 30
+                        elif selected_enemy == "Goblin":
+                            enemyhp = 15
+                        elif selected_enemy == "Bandit":
+                            enemyhp = 20
+                        new_enemy = False
 
 
 
@@ -478,6 +496,7 @@ while run:
         enemy_text_hp = game_font.render("SLAIN", True, (214, 4, 4))
         screen.blit(enemy_text_hp, (350, 130))
         enemyhp_show = False
+        space_prompt = True
 
     if not player_dead:
         # Attack button
