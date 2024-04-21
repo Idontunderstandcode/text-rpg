@@ -329,6 +329,7 @@ while run:
                         attack_message_shown = False
                         new_enemy = True
                         space_prompt = False
+
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE and new_enemy:
                     active_message = 14
@@ -337,7 +338,7 @@ while run:
                     new_enemy = False
 
 
-        # Abilities
+        # Abilities ADJUST DAMAGE SO YOU CANT ONE SHOT OR FIX BUGS
         #Shield bash
         if event.type == pygame.MOUSEBUTTONDOWN:
             if button_rect_2.collidepoint(event.pos) and knight and player_turn and not cooldown:
@@ -371,6 +372,21 @@ while run:
                     active_message = 10
                     message = messages[active_message]
                     counter = 0
+
+        if enemyhp < 1 and not new_enemy:
+            enemy_dead = True
+            enemy_attack = 0
+            attack_message_shown = True
+            space_prompt = False
+
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and attack_message_shown and not new_enemy and active_message == 10:
+                    active_message = 13
+                    message = messages[active_message]
+                    counter = 0
+                    attack_message_shown = False
+                    new_enemy = True
+                    space_prompt = False
 
         # Double shot
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -429,7 +445,7 @@ while run:
     if new_enemy:
         space_prompt = False
         text_enc = game_font.render("> BACKSPACE", True, (255, 255, 255))
-        screen.blit(text_enc, (600, 425))
+        screen.blit(text_enc, (560, 425))
 
     if message_shown:
         button_active = True
