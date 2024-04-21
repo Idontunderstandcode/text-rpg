@@ -25,7 +25,9 @@ if selected_enemy == "Bandit":
 
 player_attack = None
 player_hp = 1
+enemy_count = 0
 
+# Encounter messages are 9 and 14
 messages = ['Select a class from below',
             'You have chosen the knight',
             'You have chosen the archer',
@@ -40,7 +42,7 @@ messages = ['Select a class from below',
             'The ' + str(selected_enemy) + ' has dealt ' + str(enemy_attack) + ' DMG!',
             'You have been slain',
             'You have slain the ' + str(selected_enemy),
-            'test',
+            'You have encountered a ' + str(selected_enemy),
             'Ability on cooldown for rest of combat'
             ]
 
@@ -112,6 +114,8 @@ button_rect_6 = pygame.Rect(625, 425, button_width_4, button_height_4)
 text_6 = "No"
 text_color_6 = (176, 26, 26)
 
+
+text_info = game_font.render("Click SPACE to proceed", True, (255, 255, 255))
 text_choose = game_font.render("Choose a class:", True, (255, 255, 255))
 text_cont = game_font.render("Space", True, (255, 255, 255))
 text_enc = game_font.render("Backspace", True, (255, 255, 255))
@@ -138,12 +142,19 @@ cooldown = False
 enemyhp_show = False
 new_enemy = False
 attack_valid = False
+hint_recieved = False
 
 def generate_attack_message(player_attack):
     return "The " + str(selected_enemy) + " has taken " + str(player_attack) + " DMG!"
 
 def enemy_generate_attack_message(enemy_attack):
     return "The " + str(selected_enemy) + " has dealt " + str(enemy_attack) + " DMG!"
+
+def new_encounter(selected_enemy):
+    return "You have encountered a " + str(selected_enemy)
+
+def enemy_slain(selected_enemy):
+    return "You have slain the " + str(selected_enemy)
 
 def is_message_complete(counter, message_length, speed):
     return counter >= speed * message_length
@@ -153,6 +164,7 @@ while run:
     timer.tick(60)
     pygame.draw.rect(screen, 'black', [0, 0, 800, 500])
     pygame.display.set_caption('Pygame RPG')
+    enemy_count = 0
 
     if counter < speed * len(message):
         counter += 1
@@ -240,6 +252,8 @@ while run:
                 active_message = 9
                 message = messages[active_message]
                 counter = 0
+                enemy_count += 1
+                print("Enemy count is " + str(enemy_count))
                 space_prompt = False
                 player_turn = True
                 enemy_turn = False
@@ -323,6 +337,7 @@ while run:
 
                 if event.type == pygame.KEYDOWN:
                     if event.key == pygame.K_SPACE and attack_message_shown and not new_enemy and active_message == 10:
+                        messages[13] = enemy_slain(selected_enemy)
                         active_message = 13
                         message = messages[active_message]
                         counter = 0
@@ -330,15 +345,31 @@ while run:
                         new_enemy = True
                         space_prompt = False
 
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.KEYDOWN and new_enemy:
                 if event.key == pygame.K_BACKSPACE and new_enemy:
+                    selected_enemy = random.choice(enemies)
+                    if selected_enemy == "Troll":
+                        enemyhp = 30
+                    elif selected_enemy == "Goblin":
+                        enemyhp = 15
+                    elif selected_enemy == "Bandit":
+                        enemyhp = 20
+                    enemyhp_show = True
+                    cooldown = False
+                    messages[14] = new_encounter(selected_enemy)
                     active_message = 14
                     message = messages[active_message]
+                    enemy_count += 1
+                    print("Enemy count is " + str(enemy_count))
                     counter = 0
                     new_enemy = False
+                    space_prompt = False
+                    player_turn = True
+                    enemy_turn = False
 
 
-        # Abilities ADJUST DAMAGE SO YOU CANT ONE SHOT OR FIX BUGS
+
+        # Abilities
         #Shield bash
         if event.type == pygame.MOUSEBUTTONDOWN:
             if button_rect_2.collidepoint(event.pos) and knight and player_turn and not cooldown:
@@ -350,12 +381,10 @@ while run:
                 player_turn = False
 
 
-
             if button_rect_2.collidepoint(event.pos) and cooldown and player_turn:
                 active_message = 15
                 message = messages[active_message]
                 counter = 0
-
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -372,21 +401,6 @@ while run:
                     active_message = 10
                     message = messages[active_message]
                     counter = 0
-
-        if enemyhp < 1 and not new_enemy:
-            enemy_dead = True
-            enemy_attack = 0
-            attack_message_shown = True
-            space_prompt = False
-
-            if event.type == pygame.KEYDOWN:
-                if event.key == pygame.K_SPACE and attack_message_shown and not new_enemy and active_message == 10:
-                    active_message = 13
-                    message = messages[active_message]
-                    counter = 0
-                    attack_message_shown = False
-                    new_enemy = True
-                    space_prompt = False
 
         # Double shot
         if event.type == pygame.MOUSEBUTTONDOWN:
@@ -414,9 +428,27 @@ while run:
                     message = messages[active_message]
                     counter = 0
 
+        if enemyhp < 1 and not new_enemy:
+            enemy_dead = True
+            enemy_attack = 0
+            attack_message_shown = True
+            space_prompt = False
 
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_SPACE and attack_message_shown and not new_enemy:
+                    messages[13] = enemy_slain(selected_enemy)
+                    active_message = 13
+                    message = messages[active_message]
+                    counter = 0
+                    attack_message_shown = False
+                    new_enemy = True
+                    space_prompt = False
 
-
+        # Space key handling and hint prompt
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_SPACE and not hint_recieved:
+                hint_recieved = True
+                print(hint_recieved)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -446,6 +478,12 @@ while run:
         space_prompt = False
         text_enc = game_font.render("> BACKSPACE", True, (255, 255, 255))
         screen.blit(text_enc, (560, 425))
+
+    if ready and not hint_recieved:
+        text_info = game_font.render("Click SPACE to continue", True, (255, 222, 38))
+        screen.blit(text_info, (425, 350))
+
+
 
     if message_shown:
         button_active = True
