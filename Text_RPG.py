@@ -16,12 +16,20 @@ dagger = random.randint(5, 8)
 axe = random.randint(6, 7)
 selected_enemy = random.choice(enemies)
 
+enemies2 = ["Skeleton", "Zombie", "Banshee"]
+
 if selected_enemy == "Troll":
     enemyhp = 30
 if selected_enemy == "Goblin":
     enemyhp = 15
 if selected_enemy == "Bandit":
     enemyhp = 20
+
+# Bosses
+boss1 = "Giant"
+boss1_hp = 100
+
+
 
 player_attack = None
 player_hp = 1
@@ -43,7 +51,9 @@ messages = ['Select a class from below',
             'You have been slain',
             'You have slain the ' + str(selected_enemy),
             'You have encountered a ' + str(selected_enemy),
-            'Ability on cooldown for rest of combat'
+            'Ability on cooldown for rest of combat',
+            'You have encountered a ' + str(boss1),
+            'ACT 2'
             ]
 
 snip = game_font.render('', True, 'white')
@@ -61,7 +71,7 @@ button_color = (0, 0, 0)
 outline_color = (255, 255, 255)
 button_rect = pygame.Rect(150, 200, button_width, button_height)
 text = "Attack"
-text_color = (255, 255, 255)
+text_color = (207, 0, 0)
 
 # Ability
 button_width_2 = 150
@@ -70,7 +80,7 @@ button_color_2 = (0, 0, 0)
 outline_color_2 = (255, 255, 255)
 button_rect_2 = pygame.Rect(500, 200, button_width_2, button_height_2)
 text_2 = "Ability"
-text_color_2 = (255, 255, 255)
+text_color_2 = (66, 181, 27)
 
 # Knight
 button_width_3 = 150
@@ -79,7 +89,7 @@ button_color_3 = (0, 0, 0)
 outline_color_3 = (255, 255, 255)
 button_rect_3 = pygame.Rect(325, 390, button_width_3, button_height_3)
 text_3 = "Knight"
-text_color_3 = (255, 255, 255)
+text_color_3 = (16, 126, 204)
 knight = False
 sword = random.randint(5, 10)
 knight_hp = 100
@@ -91,7 +101,7 @@ button_color_4 = (0, 0, 0)
 outline_color_4 = (255, 255, 255)
 button_rect_4 = pygame.Rect(500, 390, button_width_4, button_height_4)
 text_4 = "Archer"
-text_color_4 = (255, 255, 255)
+text_color_4 = (16, 126, 204)
 archer = False
 archer_hp = 50
 bow = random.randint(10, 15)
@@ -143,6 +153,14 @@ enemyhp_show = False
 new_enemy = False
 attack_valid = False
 hint_recieved = False
+boss1_spawn = False
+boss1_dead = False
+boss1_hp = 1
+boss1_turn = False
+boss1_attack = random.randint(10, 15)
+act_2 = False
+test_flag = False
+hp_info_prompt = False
 
 def generate_attack_message(player_attack):
     return "The " + str(selected_enemy) + " has taken " + str(player_attack) + " DMG!"
@@ -150,8 +168,12 @@ def generate_attack_message(player_attack):
 def enemy_generate_attack_message(enemy_attack):
     return "The " + str(selected_enemy) + " has dealt " + str(enemy_attack) + " DMG!"
 
+def boss1_generate_attack_message(boss1_atttack):
+    return "The Giant has dealt " + str(boss1_atttack) + " DMG!"
+
 def new_encounter(selected_enemy):
     return "You have encountered a " + str(selected_enemy)
+    enemy_count += 1
 
 def enemy_slain(selected_enemy):
     return "You have slain the " + str(selected_enemy)
@@ -164,7 +186,6 @@ while run:
     timer.tick(60)
     pygame.draw.rect(screen, 'black', [0, 0, 800, 500])
     pygame.display.set_caption('Pygame RPG')
-    enemy_count = 0
 
     if counter < speed * len(message):
         counter += 1
@@ -206,7 +227,7 @@ while run:
                     text_2 = "Gemini Salvo"
                     button_width_2 = 200
                     button_height_2 = 50
-                    button_rect_2 = pygame.Rect(475, 200, button_width_2, button_height_2)
+                    button_rect_2 = pygame.Rect(492, 200, button_width_2, button_height_2)
                     print("You chose the archer")
                     ready = True
                     space_prompt = True
@@ -345,8 +366,8 @@ while run:
                         new_enemy = True
                         space_prompt = False
 
-            if event.type == pygame.KEYDOWN and new_enemy:
-                if event.key == pygame.K_BACKSPACE and new_enemy:
+            if event.type == pygame.KEYDOWN and new_enemy and not boss1_spawn:
+                if event.key == pygame.K_BACKSPACE and new_enemy and not boss1_spawn:
                     selected_enemy = random.choice(enemies)
                     if selected_enemy == "Troll":
                         enemyhp = 30
@@ -404,7 +425,7 @@ while run:
 
         # Double shot
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if button_rect_2.collidepoint(event.pos) and archer and player_turn:
+            if button_rect_2.collidepoint(event.pos) and archer and player_turn and not cooldown:
                 active_message = 5
                 message = messages[active_message]
                 counter = 0
@@ -444,11 +465,58 @@ while run:
                     new_enemy = True
                     space_prompt = False
 
+        # Boss 1
+        if enemy_count == 3 and enemyhp < 1:
+            boss1_spawn = True
+            enemy_turn = False
+            cooldown = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                if enemy_count == 3 and active_message == 13 and enemyhp < 1 and boss1_spawn:
+                    active_message = 16
+                    message = messages[active_message]
+                    counter = 0
+                    selected_enemy = "Giant"
+                    new_enemy = False
+                    enemyhp = 20
+                    enemyhp_show = True
+                    player_turn = True
+                    enemy_turn = False
+                    test_flag = True
+                if boss1_spawn:
+                    enemy_attack = random.randint(10, 15)
+                    messages[11] = enemy_generate_attack_message(enemy_attack)
+                    counter = 0
+
+        if enemyhp < 1 and boss1_spawn and test_flag:
+            act_2 = True
+            boss1_dead = True
+            space_prompt = True
+            new_enemy = False
+
+
+        # ACT 2
+        if event.type == pygame.KEYDOWN and boss1_dead and act_2:
+            if event.key == pygame.K_SPACE and boss1_dead and act_2:
+                active_message = 17
+                message = messages[active_message]
+                counter = 0
+                enemyhp_show = False
+                enemyhp = 2
+                space_prompt = False
+                enemy_text_hp = False
+
+
+
         # Space key handling and hint prompt
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and not hint_recieved:
                 hint_recieved = True
                 print(hint_recieved)
+            if event.key == pygame.K_SPACE and not hp_info_prompt:
+                hp_info_prompt = True
+                print(hp_info_prompt)
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -483,6 +551,10 @@ while run:
         text_info = game_font.render("Click SPACE to continue", True, (255, 222, 38))
         screen.blit(text_info, (425, 350))
 
+    if ready and not hp_info_prompt:
+        test_infohp = game_font.render("Player Vitality", True, (255, 222, 38))
+        screen.blit(test_infohp, (50, 350))
+
 
 
     if message_shown:
@@ -503,9 +575,19 @@ while run:
         text_rect_6.y += 5
         screen.blit(text_surface_6, text_rect_6)
 
+    # Player HP handling
     if hp_show:
-        text_hp = game_font.render("HP: " + str(player_hp), True, (255, 255, 255))
+        text_hp = game_font.render("HP: " + str(player_hp), True, (73, 209, 27)) # Default Green
         screen.blit(text_hp, (50, 425))
+    if player_hp < 71 and hp_show and knight:
+        text_hp = game_font.render("HP: " + str(player_hp), True, (242, 221, 29)) # Yellow
+        screen.blit(text_hp, (50, 425))
+    if player_hp < 31 and hp_show and knight:
+        text_hp = game_font.render("HP: " + str(player_hp), True, (207, 0, 0)) # Red
+        screen.blit(text_hp, (50, 425))
+
+
+
     if enemyhp_show:
         enemy_text_hp = game_font.render("HP: " + str(enemyhp), True, (214, 4, 4))
         screen.blit(enemy_text_hp, (350, 130))
@@ -514,6 +596,11 @@ while run:
         screen.blit(enemy_text_hp, (350, 130))
         enemyhp_show = False
         space_prompt = False
+    if player_dead:
+        hp_show = False
+        text_php = game_font.render("SLAIN", True, (206, 48, 209))
+        screen.blit(text_php, (50, 425))
+        enemyhp_show = False
 
     if not player_dead:
         # Attack button
