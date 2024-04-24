@@ -206,7 +206,7 @@ while run:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
 
-                if button_rect_3.collidepoint(event.pos):
+                if button_rect_3.collidepoint(event.pos) and not knight and not archer:
                     active_message = 1
                     message = messages[active_message]
                     counter = 0
@@ -222,7 +222,7 @@ while run:
                     ready = True
                     space_prompt = True
 
-                if button_rect_4.collidepoint(event.pos):
+                if button_rect_4.collidepoint(event.pos) and not archer and not knight:
                     active_message = 2
                     message = messages[active_message]
                     counter = 0
@@ -230,7 +230,7 @@ while run:
                     player_hp =+ archer_hp
                     hp_show = True
                     archer = True
-                    text_2 = "Gemini Salvo"
+                    text_2 = "Double Shot"
                     button_width_2 = 200
                     button_height_2 = 50
                     button_rect_2 = pygame.Rect(492, 200, button_width_2, button_height_2)
@@ -269,13 +269,13 @@ while run:
                 button_active = False
 
         if event.type == pygame.KEYDOWN and not ready and act_1:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and knight or archer:
                 active_message = 8
                 message = messages[active_message]
                 counter = 0
 
         if event.type == pygame.KEYDOWN and not ready and not encounter:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and knight or archer:
                 active_message = 9
                 message = messages[active_message]
                 counter = 0
@@ -485,7 +485,7 @@ while run:
                     counter = 0
                     selected_enemy = "Giant"
                     new_enemy = False
-                    enemyhp = 20 # CHANGE VALUE LATER
+                    enemyhp = 20  # CHANGE VALUE LATER
                     enemyhp_show = True
                     player_turn = True
                     enemy_turn = False
@@ -495,29 +495,18 @@ while run:
                     messages[11] = enemy_generate_attack_message(enemy_attack)
                     counter = 0
 
-    if enemyhp < 1 and boss1_spawn and test_flag:
-        act_2 = True
-        boss1_dead = True
-        space_prompt = True
-        new_enemy = False
-
+        if enemyhp < 1 and boss1_spawn and test_flag:
+            act_2 = True
+            boss1_dead = True
+            space_prompt = False
+            new_enemy = True
 
         # ACT 2
-    if act_2 and boss1_dead:
-        if event.type == pygame.KEYDOWN:
-           if event.key == pygame.K_SPACE:
-               space_prompt = False
-               boss1_spawn = False
-               active_message = 13
-               print(active_message)
-               message = messages[active_message]
-               counter = 0
-
-        if event.type == pygame.KEYDOWN:
-            if boss1_dead and act_2 and active_message == 13:
-                if event.key == pygame.K_SPACE:
-                    active_message = 17
-                    message = messages[active_message]
+        if act_2 and boss1_dead:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    active_message = 17  # Transition to Act 2
+                    message = messages[active_message]  # Update message content
                     counter = 0
                     enemyhp_show = False
                     enemyhp = 2
@@ -527,10 +516,10 @@ while run:
 
         # Spacekey handling and hint prompt
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and not hint_recieved:
+            if event.key == pygame.K_SPACE and not hint_recieved and knight or archer:
                 hint_recieved = True
                 print(hint_recieved)
-            if event.key == pygame.K_SPACE and not hp_info_prompt:
+            if event.key == pygame.K_SPACE and not hp_info_prompt and knight or archer:
                 hp_info_prompt = True
                 print(hp_info_prompt)
 
