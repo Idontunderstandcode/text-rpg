@@ -28,13 +28,13 @@ enemies2 = ["Skeleton", "Zombie", "Banshee"]
 # Zombie has 35 HP and DMG range of 9 to 11
 # Banshee has 40 HP and DMG range of 5 to 15
 
-
+enemies3 = ["Possessed Knight", "Evil Mage", "Ghoul"]
 
 # Bosses
 boss1 = "Giant"
 boss1_hp = 100
 
-
+boss2 = "Vampire"
 
 player_attack = None
 player_hp = 1
@@ -46,7 +46,7 @@ messages = ['Select a class from below',
             'You have chosen the archer',
             'You chose to attack!',
             'You chose to Shield Bash!',
-            'You chose to use Gemini Salvo!',
+            'You chose to use Double Shot!',
             'Are you ready to start the run?',
             'Bold of you to assume you had a choice',
             'ACT 1',
@@ -59,7 +59,9 @@ messages = ['Select a class from below',
             'Ability on cooldown for rest of combat',
             'You have encountered a ' + str(boss1),
             'ACT 2',
-            'Your stats have increased!'
+            'Your stats have increased!',
+            'You have encountered a ' + str(boss2),
+            'ACT 3'
             ]
 
 snip = game_font.render('', True, 'white')
@@ -159,14 +161,32 @@ enemyhp_show = False
 new_enemy = False
 attack_valid = False
 hint_recieved = False
+
 boss1_spawn = False
 boss1_dead = False
 boss1_hp = 1
 boss1_turn = False
 boss1_attack = random.randint(10, 15)
+
+boss2_spawn = False
+boss2_dead = False
+boss2_hp = 1
+boss2_turn = False
+boss2_attack = random.randint(15, 20)
+
 act_2 = False
 test_flag = False
 hp_info_prompt = False
+flicker_fix = False
+knight_upgrade = False
+knight_upgrade2 = False
+archer_upgrade = False
+archer_upgrade2 = False
+enemies_set2 = False
+enemies_set3 = False
+act2_boss = False
+act_3 = False
+no_stat = False
 
 def generate_attack_message(player_attack):
     return "The " + str(selected_enemy) + " has taken " + str(player_attack) + " DMG!"
@@ -317,12 +337,20 @@ while run:
             if space_prompt and attack_message_shown and attack_valid and not new_enemy:
                 if event.key == pygame.K_SPACE:
                     # Display message for damage dealt to enemy
-                    if knight:
+                    if knight and not knight_upgrade:
                         player_attack = random.randint(5, 10)
-                    elif archer:
+                    if knight_upgrade and knight:
                         player_attack = random.randint(10, 15)
+                    if knight_upgrade2 and knight:
+                        player_attack = random.randint(15, 20)
+                    if archer and not archer_upgrade:
+                        player_attack = random.randint(10, 15)
+                    if archer_upgrade and archer:
+                        player_attack = random.randint(15, 20)
+                    if archer_upgrade2 and archer:
+                        player_attack = random.randint(20, 25)
                     enemyhp -= player_attack
-                    print(enemyhp)
+
                     messages[10] = generate_attack_message(player_attack)
                     active_message = 10
                     message = messages[active_message]
@@ -341,6 +369,19 @@ while run:
                         enemy_attack = random.randint(5, 8)
                     elif selected_enemy == "Bandit":
                         enemy_attack = random.randint(6, 7)
+                    if selected_enemy == "Skeleton":
+                        enemy_attack = random.randint(8, 12)
+                    elif selected_enemy == "Zombie":
+                        enemy_attack = random.randint(9, 11)
+                    elif selected_enemy == "Banshee":
+                        enemy_attack = random.randint(10,15)
+                    if selected_enemy == "Possessed Knight":
+                        enemy_attack = random.randint(15, 20)
+                    elif selected_enemy == "Evil Mage":
+                        enemy_attack = random.randint(18, 23)
+                    elif selected_enemy == "Ghoul":
+                        enemy_attack = random.randint(20, 23)
+
                     messages[11] = enemy_generate_attack_message(enemy_attack)
                     player_hp -= enemy_attack
                     active_message = 11
@@ -372,8 +413,9 @@ while run:
                         new_enemy = True
                         space_prompt = False
 
-            if event.type == pygame.KEYDOWN and new_enemy and not boss1_spawn:
-                if event.key == pygame.K_BACKSPACE and new_enemy and not boss1_spawn:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE and new_enemy and not boss1_spawn and not boss2_spawn:
+
                     selected_enemy = random.choice(enemies)
                     if selected_enemy == "Dire Wolf":
                         enemyhp = 30
@@ -381,6 +423,27 @@ while run:
                         enemyhp = 20
                     elif selected_enemy == "Bandit":
                         enemyhp = 25
+
+                    if enemies_set2:
+                        selected_enemy = random.choice(enemies2)
+
+                    if selected_enemy == "Skeleton":
+                        enemyhp = 25
+                    elif selected_enemy == "Zombie":
+                        enemyhp = 35
+                    elif selected_enemy == "Banshee":
+                        enemyhp = 40
+
+                    if enemies_set3:
+                        selected_enemy = random.choice(enemies3)
+
+                    if selected_enemy == "Possessed Knight":
+                        enemyhp = 45
+                    elif selected_enemy == "Evil Mage":
+                        enemyhp = 50
+                    elif selected_enemy == "Ghoul":
+                        enemyhp = 40
+
                     enemyhp_show = True
                     cooldown = False
                     messages[14] = new_encounter(selected_enemy)
@@ -393,8 +456,6 @@ while run:
                     space_prompt = False
                     player_turn = True
                     enemy_turn = False
-
-
 
         # Abilities
         #Shield bash
@@ -421,10 +482,15 @@ while run:
                     enemy_turn = True
                     cooldown = True
                     space_prompt = True
-                    player_attack = random.randint(10, 20)
+                    if knight and not knight_upgrade:
+                        player_attack = random.randint(10, 20)
+                    if knight and knight_upgrade:
+                        player_attack = random.randint(20, 25)
+                    if knight_upgrade2 and knight:
+                        player_attack = random.randint(25, 30)
                     messages[10] = generate_attack_message(player_attack)
                     enemyhp -= player_attack
-                    print(enemyhp)
+
                     active_message = 10
                     message = messages[active_message]
                     counter = 0
@@ -447,10 +513,15 @@ while run:
                     double_shot = False
                     cooldown = True
                     space_prompt = True
-                    player_attack = random.randint(15, 25)
+                    if archer and not archer_upgrade:
+                        player_attack = random.randint(150, 250)
+                    if archer and archer_upgrade:
+                        player_attack = random.randint(250, 300)
+                    if archer and archer_upgrade2:
+                        player_attack = random.randint(30, 35)
                     messages[10] = generate_attack_message(player_attack)
                     enemyhp -= player_attack
-                    print(enemyhp)
+
                     active_message = 10
                     message = messages[active_message]
                     counter = 0
@@ -498,30 +569,137 @@ while run:
         if enemyhp < 1 and boss1_spawn and test_flag:
             act_2 = True
             boss1_dead = True
+            boss1_spawn = False
             space_prompt = False
             new_enemy = True
+            test_flag = False
 
         # ACT 2
-        if act_2 and boss1_dead:
+        if act_2 and boss1_dead and not flicker_fix and not no_stat:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
-                    active_message = 17  # Transition to Act 2
-                    message = messages[active_message]  # Update message content
+                    active_message = 17
+                    message = messages[active_message]
                     counter = 0
                     enemyhp_show = False
                     enemyhp = 2
-                    space_prompt = False
+                    space_prompt = True
                     enemy_text_hp = False
+                    enemies_set2 = True
+                    boss1_dead = False
+                    no_stat = True
+                    print("The no stat is ")
+
+        if event.type == pygame.KEYDOWN and act_2 and active_message == 17:
+            if event.key == pygame.K_SPACE:
+                active_message = 18
+                message = messages[active_message]
+                counter = 0
+                flicker_fix = True
+                boss1_spawn = False
+                new_enemy = True
+                if knight:
+                    player_hp = 125
+                    knight_upgrade = True
+                elif archer:
+                    player_hp = 70
+                    archer_upgrade = True
+
+        if enemy_count == 7 and enemyhp < 1:
+            boss2_spawn = True
+            enemy_turn = False
+            cooldown = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                if enemy_count == 7 and active_message == 13 and enemyhp < 1 and boss2_spawn:
+                    print("Boss2 worked")
+                    active_message = 19
+                    message = messages[active_message]
+                    counter = 0
+                    selected_enemy = "Vampire"
+                    new_enemy = False
+                    enemyhp = 20  # CHANGE VALUE LATER
+                    enemyhp_show = True
+                    player_turn = True
+                    enemy_turn = False
+                    test_flag = True
+                if boss2_spawn:
+                    enemy_attack = random.randint(15, 20)
+                    messages[11] = enemy_generate_attack_message(enemy_attack)
+                    counter = 0
+
+        if enemyhp < 1 and boss2_spawn and test_flag:
+            act_3 = True
+            print("test")
+            boss2_dead = True
+            boss2_spawn = False
+            space_prompt = False
+            new_enemy = True
+            test_flag = False
+
+        # rewrite ACT 3 code
+        if act_3 and boss2_dead and flicker_fix:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE and boss2_dead:
+                    active_message = 20
+                    message = messages[active_message]
+                    counter = 0
+                    enemyhp_show = False
+                    enemyhp = 2
+                    space_prompt = True
+                    enemy_text_hp = False
+                    enemies_set3 = True
+                    boss2_dead = False
+
+
+
+
+       # if boss2_dead and not act_3:
+       #     print("act 3 work")
+       #     act_3 = True
+       #     space_prompt = True
+       # if event.type == pygame.KEYDOWN and act_3 and space_prompt:
+       #     if event.key == pygame.K_SPACE:
+       #         print("message displayed")
+       #         active_message = 20
+       #         message = messages[active_message]
+       #         counter = 0
+       #         enemyhp_show = False
+       #         enemyhp = 2
+       #         space_prompt = True
+       #         enemy_text_hp = False
+       #         enemies_set3 = True
+       #        boss2_dead = False
+
+
+        # EDIT THE NO STAT HERE
+        if event.type == pygame.KEYDOWN and act_3 and active_message == 20 and not no_stat:
+            if event.key == pygame.K_BACKSPACE:
+                active_message = 18
+                message = messages[active_message]
+                counter = 0
+                flicker_fix = True
+                boss2_spawn = False
+                new_enemy = True
+                if knight:
+                    player_hp = 150
+                    knight_upgrade = False
+                    knight_upgrade2 = True
+                elif archer:
+                    player_hp = 100
+                    archer_upgrade = False
+                    archer_upgrade2 = True
 
 
         # Spacekey handling and hint prompt
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE and not hint_recieved and knight or archer:
                 hint_recieved = True
-                print(hint_recieved)
+
             if event.key == pygame.K_SPACE and not hp_info_prompt and knight or archer:
                 hp_info_prompt = True
-                print(hp_info_prompt)
+
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
