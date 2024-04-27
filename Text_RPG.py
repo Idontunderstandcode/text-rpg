@@ -595,6 +595,8 @@ while run:
         if act_2 and boss1_dead and not flicker_fix and not no_stat:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_BACKSPACE:
+                    pygame.mixer.music.load('Audio/SkeletonGraveyard.mp3')
+                    pygame.mixer.music.play(1)
                     active_message = 17
                     message = messages[active_message]
                     counter = 0
@@ -678,6 +680,8 @@ while run:
         if event.type == pygame.KEYDOWN and act_3 and space_prompt and not act_3_gameloop:
             if event.key == pygame.K_BACKSPACE:
                 print("message displayed")
+                pygame.mixer.music.load('Audio/YASSSS SO INTANNSEEE (1).mp3')
+                pygame.mixer.music.play(1)
                 active_message = 20
                 message = messages[active_message]
                 counter = 0
