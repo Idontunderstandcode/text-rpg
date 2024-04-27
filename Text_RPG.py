@@ -531,11 +531,11 @@ while run:
                     cooldown = True
                     space_prompt = True
                     if archer and not archer_upgrade:
-                        player_attack = random.randint(150, 250)
+                        player_attack = random.randint(15, 25)
                     if archer and archer_upgrade:
-                        player_attack = random.randint(250, 300)
+                        player_attack = random.randint(20, 30)
                     if archer and archer_upgrade2:
-                        player_attack = random.randint(300, 350)
+                        player_attack = random.randint(30, 35)
                     messages[10] = generate_attack_message(player_attack)
                     enemyhp -= player_attack
 
