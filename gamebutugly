@@ -4,7 +4,7 @@ import random
 
 pygame.init()
 game_font = pygame.font.Font('font/Pixeltype.ttf', 50)
-screen = pygame.display.set_mode([800, 444])
+screen = pygame.display.set_mode([800, 500])
 timer = pygame.time.Clock()
 
 # Enemies
@@ -28,13 +28,15 @@ enemies2 = ["Skeleton", "Zombie", "Banshee"]
 # Zombie has 35 HP and DMG range of 9 to 11
 # Banshee has 40 HP and DMG range of 5 to 15
 
-
+enemies3 = ["Possessed Knight", "Evil Mage", "Ghoul"]
 
 # Bosses
 boss1 = "Giant"
 boss1_hp = 100
 
+boss2 = "Vampire"
 
+boss3 = "Dragon"
 
 player_attack = None
 player_hp = 1
@@ -46,10 +48,10 @@ messages = ['Select a class from below',
             'You have chosen the archer',
             'You chose to attack!',
             'You chose to Shield Bash!',
-            'You chose to use Gemini Salvo!',
+            'You chose to use Double Shot!',
             'Are you ready to start the run?',
             'Bold of you to assume you had a choice',
-            'ACT 1',
+            'ACT 1  -  Forest',
             'You have encountered a ' + str(selected_enemy),
             'The ' + str(selected_enemy) + ' has taken ' + str(player_attack) + ' DMG!',
             'The ' + str(selected_enemy) + ' has dealt ' + str(enemy_attack) + ' DMG!',
@@ -59,7 +61,11 @@ messages = ['Select a class from below',
             'Ability on cooldown for rest of combat',
             'You have encountered a ' + str(boss1),
             'ACT 2',
-            'Your stats have increased!'
+            'Your stats have increased!',
+            'You have encountered a ' + str(boss2),
+            'ACT 3',
+            'You have encountered a ' + str(boss3),
+            'Congratulations, you have beat the game!'
             ]
 
 snip = game_font.render('', True, 'white')
@@ -86,14 +92,14 @@ button_color_2 = (0, 0, 0)
 outline_color_2 = (255, 255, 255)
 button_rect_2 = pygame.Rect(500, 200, button_width_2, button_height_2)
 text_2 = "Ability"
-text_color_2 = (148, 66, 255)
+text_color_2 = (66, 181, 27)
 
 # Knight
 button_width_3 = 150
 button_height_3 = 50
 button_color_3 = (0, 0, 0)
 outline_color_3 = (255, 255, 255)
-button_rect_3 = pygame.Rect(325, 360, button_width_3, button_height_3)
+button_rect_3 = pygame.Rect(325, 390, button_width_3, button_height_3)
 text_3 = "Knight"
 text_color_3 = (255, 255, 255)
 knight = False
@@ -105,7 +111,7 @@ button_width_4 = 150
 button_height_4 = 50
 button_color_4 = (0, 0, 0)
 outline_color_4 = (255, 255, 255)
-button_rect_4 = pygame.Rect(500, 360, button_width_4, button_height_4)
+button_rect_4 = pygame.Rect(500, 390, button_width_4, button_height_4)
 text_4 = "Archer"
 text_color_4 = (255, 255, 255)
 archer = False
@@ -117,7 +123,7 @@ button_width_5 = 150
 button_height_5 = 50
 button_color_5 = (0, 0, 0)
 outline_color_5 = (255, 255, 255)
-button_rect_5 = pygame.Rect(450, 380, button_width_4, button_height_4)
+button_rect_5 = pygame.Rect(450, 425, button_width_4, button_height_4)
 text_5 = "Yes"
 text_color_5 = (48, 191, 86)
 
@@ -126,7 +132,7 @@ button_width_6 = 150
 button_height_6 = 50
 button_color_6 = (0, 0, 0)
 outline_color_6 = (255, 255, 255)
-button_rect_6 = pygame.Rect(625, 380, button_width_4, button_height_4)
+button_rect_6 = pygame.Rect(625, 425, button_width_4, button_height_4)
 text_6 = "No"
 text_color_6 = (176, 26, 26)
 
@@ -159,14 +165,43 @@ enemyhp_show = False
 new_enemy = False
 attack_valid = False
 hint_recieved = False
+
 boss1_spawn = False
 boss1_dead = False
 boss1_hp = 1
 boss1_turn = False
 boss1_attack = random.randint(10, 15)
+
+boss2_spawn = False
+boss2_dead = False
+boss2_hp = 20
+boss2_turn = False
+boss2_attack = random.randint(15, 20)
+
+boss3_spawn = False
+boss3_dead = False
+boss3_turn = False
+
 act_2 = False
 test_flag = False
 hp_info_prompt = False
+flicker_fix = False
+knight_upgrade = False
+knight_upgrade2 = False
+archer_upgrade = False
+archer_upgrade2 = False
+enemies_set2 = False
+enemies_set3 = False
+act2_boss = False
+act_3 = False
+no_stat = False
+act_3_gameloop = False
+end_game = False
+attack_invalid = False
+text_move = False
+forest_bgshow = False
+graveyard_bgshow = False
+castle_bgshow = False
 
 def generate_attack_message(player_attack):
     return "The " + str(selected_enemy) + " has taken " + str(player_attack) + " DMG!"
@@ -181,28 +216,25 @@ def new_encounter(selected_enemy):
     return "You have encountered a " + str(selected_enemy)
     enemy_count += 1
 
+def new_boss(boss2_spawn):
+    return "You have encountered a " + str(boss2)
+    enemy_count += 1
+
 def enemy_slain(selected_enemy):
     return "You have slain the " + str(selected_enemy)
 
 def is_message_complete(counter, message_length, speed):
     return counter >= speed * message_length
 
-background_image = pygame.image.load('Backgrounds/forest_upscaled (1).png')
-rectbox_width = 550
-rectbox_height = 41
-rectbox_color = (0, 0, 0)
-outline_color_rectbox = (255, 255, 255)
-rectbox = pygame.Rect(125, 75, rectbox_width, rectbox_height)
-
-
+forest_bg = pygame.image.load("Backgrounds/forest_upscaled (1).png")
+graveyard_bg = pygame.image.load("Backgrounds/graveyard svg.png")
+castle_bg = pygame.image.load("Backgrounds/castleart_upscaled (1).png")
 
 while run:
     screen.fill('dark grey')
     timer.tick(60)
     pygame.draw.rect(screen, 'black', [0, 0, 800, 500])
     pygame.display.set_caption('Pygame RPG')
-    screen.blit(background_image, (0, -30))
-    pygame.draw.rect(screen, 'black', rectbox, 0)
 
     if counter < speed * len(message):
         counter += 1
@@ -217,7 +249,7 @@ while run:
 
             if event.type == pygame.MOUSEBUTTONDOWN:
 
-                if button_rect_3.collidepoint(event.pos):
+                if button_rect_3.collidepoint(event.pos) and not knight and not archer:
                     active_message = 1
                     message = messages[active_message]
                     counter = 0
@@ -233,7 +265,7 @@ while run:
                     ready = True
                     space_prompt = True
 
-                if button_rect_4.collidepoint(event.pos):
+                if button_rect_4.collidepoint(event.pos) and not archer and not knight:
                     active_message = 2
                     message = messages[active_message]
                     counter = 0
@@ -241,7 +273,7 @@ while run:
                     player_hp =+ archer_hp
                     hp_show = True
                     archer = True
-                    text_2 = "Gemini Salvo"
+                    text_2 = "Double Shot"
                     button_width_2 = 200
                     button_height_2 = 50
                     button_rect_2 = pygame.Rect(492, 200, button_width_2, button_height_2)
@@ -280,13 +312,14 @@ while run:
                 button_active = False
 
         if event.type == pygame.KEYDOWN and not ready and act_1:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and knight or archer:
                 active_message = 8
                 message = messages[active_message]
                 counter = 0
 
         if event.type == pygame.KEYDOWN and not ready and not encounter:
-            if event.key == pygame.K_SPACE:
+            if event.key == pygame.K_SPACE and knight or archer:
+                text_move = True
                 active_message = 9
                 message = messages[active_message]
                 counter = 0
@@ -298,10 +331,11 @@ while run:
                 encounter = True
                 act_1 = False
                 enemyhp_show = True
+                forest_bgshow = True
 
             # Attacks
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if button_rect.collidepoint(event.pos) and knight and player_turn and not enemy_turn:
+            if button_rect.collidepoint(event.pos) and knight and player_turn and not enemy_turn and not attack_invalid:
                 # You chose to attack message
                 active_message = 3
                 message = messages[active_message]
@@ -313,7 +347,7 @@ while run:
                 act_1 = False
                 attack_valid = True
 
-            if button_rect.collidepoint(event.pos) and archer and player_turn and not enemy_turn:
+            if button_rect.collidepoint(event.pos) and archer and player_turn and not enemy_turn and not attack_invalid:
                 active_message = 3
                 message = messages[active_message]
                 counter = 0
@@ -328,12 +362,22 @@ while run:
             if space_prompt and attack_message_shown and attack_valid and not new_enemy:
                 if event.key == pygame.K_SPACE:
                     # Display message for damage dealt to enemy
-                    if knight:
+                    if knight and not knight_upgrade:
                         player_attack = random.randint(5, 10)
-                    elif archer:
+                    if knight_upgrade and knight:
                         player_attack = random.randint(10, 15)
+                    if knight_upgrade2 and knight:
+                        player_attack = random.randint(15, 20)
+                    if archer and not archer_upgrade:
+                        player_attack = random.randint(10, 15)
+                    if archer_upgrade and archer:
+                        player_attack = random.randint(15, 20)
+                    if archer_upgrade2 and archer:
+                        player_attack = random.randint(20, 25)
+
                     enemyhp -= player_attack
-                    print(enemyhp)
+                    print("The enemy hp is " + str(enemyhp))
+
                     messages[10] = generate_attack_message(player_attack)
                     active_message = 10
                     message = messages[active_message]
@@ -352,6 +396,19 @@ while run:
                         enemy_attack = random.randint(5, 8)
                     elif selected_enemy == "Bandit":
                         enemy_attack = random.randint(6, 7)
+                    if selected_enemy == "Skeleton":
+                        enemy_attack = random.randint(8, 12)
+                    elif selected_enemy == "Zombie":
+                        enemy_attack = random.randint(9, 11)
+                    elif selected_enemy == "Banshee":
+                        enemy_attack = random.randint(10,15)
+                    if selected_enemy == "Possessed Knight":
+                        enemy_attack = random.randint(15, 20)
+                    elif selected_enemy == "Evil Mage":
+                        enemy_attack = random.randint(18, 23)
+                    elif selected_enemy == "Ghoul":
+                        enemy_attack = random.randint(20, 23)
+
                     messages[11] = enemy_generate_attack_message(enemy_attack)
                     player_hp -= enemy_attack
                     active_message = 11
@@ -383,8 +440,9 @@ while run:
                         new_enemy = True
                         space_prompt = False
 
-            if event.type == pygame.KEYDOWN and new_enemy and not boss1_spawn:
-                if event.key == pygame.K_BACKSPACE and new_enemy and not boss1_spawn:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE and new_enemy and not boss1_spawn and not boss2_spawn and not boss3_spawn and enemies:
+
                     selected_enemy = random.choice(enemies)
                     if selected_enemy == "Dire Wolf":
                         enemyhp = 30
@@ -392,6 +450,27 @@ while run:
                         enemyhp = 20
                     elif selected_enemy == "Bandit":
                         enemyhp = 25
+
+                    if enemies_set2:
+                        selected_enemy = random.choice(enemies2)
+
+                    if selected_enemy == "Skeleton":
+                        enemyhp = 25
+                    elif selected_enemy == "Zombie":
+                        enemyhp = 35
+                    elif selected_enemy == "Banshee":
+                        enemyhp = 40
+
+                    if enemies_set3:
+                        selected_enemy = random.choice(enemies3)
+
+                    if selected_enemy == "Possessed Knight":
+                        enemyhp = 45
+                    elif selected_enemy == "Evil Mage":
+                        enemyhp = 50
+                    elif selected_enemy == "Ghoul":
+                        enemyhp = 40
+
                     enemyhp_show = True
                     cooldown = False
                     messages[14] = new_encounter(selected_enemy)
@@ -405,12 +484,10 @@ while run:
                     player_turn = True
                     enemy_turn = False
 
-
-
         # Abilities
         #Shield bash
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if button_rect_2.collidepoint(event.pos) and knight and player_turn and not cooldown:
+            if button_rect_2.collidepoint(event.pos) and knight and player_turn and not cooldown and not attack_invalid:
                 active_message = 4
                 message = messages[active_message]
                 counter = 0
@@ -432,17 +509,22 @@ while run:
                     enemy_turn = True
                     cooldown = True
                     space_prompt = True
-                    player_attack = random.randint(10, 20)
+                    if knight and not knight_upgrade:
+                        player_attack = random.randint(10, 20)
+                    if knight and knight_upgrade:
+                        player_attack = random.randint(20, 25)
+                    if knight_upgrade2 and knight:
+                        player_attack = random.randint(25, 30)
                     messages[10] = generate_attack_message(player_attack)
                     enemyhp -= player_attack
-                    print(enemyhp)
+
                     active_message = 10
                     message = messages[active_message]
                     counter = 0
 
         # Double shot
         if event.type == pygame.MOUSEBUTTONDOWN:
-            if button_rect_2.collidepoint(event.pos) and archer and player_turn and not cooldown:
+            if button_rect_2.collidepoint(event.pos) and archer and player_turn and not cooldown and not attack_invalid:
                 active_message = 5
                 message = messages[active_message]
                 counter = 0
@@ -458,10 +540,15 @@ while run:
                     double_shot = False
                     cooldown = True
                     space_prompt = True
-                    player_attack = random.randint(15, 25)
+                    if archer and not archer_upgrade:
+                        player_attack = random.randint(150, 250)
+                    if archer and archer_upgrade:
+                        player_attack = random.randint(250, 300)
+                    if archer and archer_upgrade2:
+                        player_attack = random.randint(30, 35)
                     messages[10] = generate_attack_message(player_attack)
                     enemyhp -= player_attack
-                    print(enemyhp)
+
                     active_message = 10
                     message = messages[active_message]
                     counter = 0
@@ -484,10 +571,10 @@ while run:
 
         # Boss 1
         if enemy_count == 3 and enemyhp < 1:
+
             boss1_spawn = True
             enemy_turn = False
             cooldown = False
-
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_BACKSPACE:
                 if enemy_count == 3 and active_message == 13 and enemyhp < 1 and boss1_spawn:
@@ -496,7 +583,7 @@ while run:
                     counter = 0
                     selected_enemy = "Giant"
                     new_enemy = False
-                    enemyhp = 20 # CHANGE VALUE LATER
+                    enemyhp = 50  # CHANGE VALUE LATER
                     enemyhp_show = True
                     player_turn = True
                     enemy_turn = False
@@ -506,44 +593,215 @@ while run:
                     messages[11] = enemy_generate_attack_message(enemy_attack)
                     counter = 0
 
-    if enemyhp < 1 and boss1_spawn and test_flag:
-        act_2 = True
-        boss1_dead = True
-        space_prompt = True
-        new_enemy = False
-
+        if enemyhp < 1 and boss1_spawn and test_flag:
+            act_2 = True
+            boss1_dead = True
+            boss1_spawn = False
+            space_prompt = False
+            new_enemy = True
+            test_flag = False
 
         # ACT 2
-    if act_2 and boss1_dead:
-        if event.type == pygame.KEYDOWN:
-           if event.key == pygame.K_SPACE:
-               space_prompt = False
-               boss1_spawn = False
-               active_message = 13
-               print(active_message)
-               message = messages[active_message]
-               counter = 0
-
-        if event.type == pygame.KEYDOWN:
-            if boss1_dead and act_2 and active_message == 13:
-                if event.key == pygame.K_SPACE:
+        if act_2 and boss1_dead and not flicker_fix and not no_stat:
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    pygame.mixer.music.load('Audio/SkeletonGraveyard.mp3')
+                    pygame.mixer.music.play(1)
                     active_message = 17
                     message = messages[active_message]
                     counter = 0
                     enemyhp_show = False
                     enemyhp = 2
-                    space_prompt = False
+                    space_prompt = True
                     enemy_text_hp = False
+                    enemies_set2 = True
+                    boss1_dead = False
+                    no_stat = True
+                    attack_invalid = True
+                    graveyard_bgshow = True
+                    print("The no stat is ")
+
+
+
+        # Player upgrade handling
+        if event.type == pygame.KEYDOWN and act_2 and active_message == 17:
+            if event.key == pygame.K_SPACE:
+                active_message = 18
+                message = messages[active_message]
+                counter = 0
+                flicker_fix = True
+                boss1_spawn = False
+                boss1_dead = False
+                boss1_turn = False
+                new_enemy = True
+                attack_invalid = False
+                if knight:
+                    player_hp = 125
+                    knight_upgrade = True
+                elif archer:
+                    player_hp = 70
+                    archer_upgrade = True
+
+        if enemy_count == 7 and enemyhp < 1:
+            boss2_spawn = True
+            enemy_turn = False
+            cooldown = False
+            flicker_fix = False
+
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                if enemy_count == 7 and active_message == 13 and enemyhp < 1 and boss2_spawn:
+                    print("Boss work")
+                    no_stat = True
+                    selected_enemy = "Vampire"
+                    messages[19] = new_encounter(selected_enemy)
+                    active_message = 19
+                    message = messages[active_message]
+                    enemy_count += 1
+                    print("The enemy count is " + str(enemy_count))
+                    counter = 0
+                    new_enemy = False
+                    enemyhp = 65
+                    print(enemyhp)
+                    enemyhp_show = True
+                    player_turn = True
+                    enemy_turn = False
+                    test_flag = True
+                    act_3 = True
+                if boss2_spawn:
+                    enemy_attack = random.randint(15, 20)
+                    messages[11] = enemy_generate_attack_message(enemy_attack)
+                    counter = 0
+
+                    print("The boss2 spawn is " + str(boss2_spawn))
+
+        # Check if the boss is dead
+        if active_message == 13 and boss2_spawn and test_flag and enemy_count == 8:
+            print("The boss 2 has died")
+            act_3 = True
+            print("test")
+            boss2_dead = True
+            boss2_spawn = False
+            space_prompt = False
+            new_enemy = True
+            test_flag = False
+
+        # ACT 3
+        if boss2_dead and act_3:
+            print("act 3 work")
+            space_prompt = True
+        if event.type == pygame.KEYDOWN and act_3 and space_prompt and not act_3_gameloop:
+            if event.key == pygame.K_BACKSPACE:
+                print("message displayed")
+                pygame.mixer.music.load('Audio/YASSSS SO INTANNSEEE (1).mp3')
+                pygame.mixer.music.play(1)
+                active_message = 20
+                message = messages[active_message]
+                counter = 0
+                enemyhp_show = False
+                enemyhp = 2
+                space_prompt = True
+                enemy_text_hp = False
+                enemies_set3 = True
+                attack_invalid = True
+
+                boss2_dead = False
+                boss2_spawn = False
+                boss2_turn = False
+
+                no_stat = True
+                act_3_gameloop = True
+                castle_bgshow = True
+
+        # Player upgrade handling
+        if event.type == pygame.KEYDOWN and act_3 and active_message == 20:
+            if event.key == pygame.K_SPACE:
+                active_message = 18
+                message = messages[active_message]
+                counter = 0
+                attack_invalid = False
+                flicker_fix = True
+                boss2_spawn = False
+                new_enemy = True
+                if knight:
+                    player_hp = 150
+                    knight_upgrade = False
+                    knight_upgrade2 = True
+                elif archer:
+                    player_hp = 100
+                    archer_upgrade = False
+                    archer_upgrade2 = True
+
+
+        if enemy_count == 13 and enemyhp < 1:
+            boss3_spawn = True
+            enemy_turn = False
+            cooldown = False
+            flicker_fix = False
+
+        # Boss 3
+        if event.type == pygame.KEYDOWN:
+            if event.key == pygame.K_BACKSPACE:
+                if enemy_count == 13 and active_message == 13 and enemyhp < 1 and boss3_spawn:
+                    print("Boss 3 work")
+                    no_stat = True
+                    selected_enemy = "Dragon"
+                    messages[21] = new_encounter(selected_enemy)
+                    active_message = 21
+                    message = messages[active_message]
+                    enemy_count += 1
+                    print("The enemy count is " + str(enemy_count))
+                    counter = 0
+                    new_enemy = False
+                    enemyhp = 99
+                    print(enemyhp)
+                    enemyhp_show = True
+                    player_turn = True
+                    enemy_turn = False
+                    test_flag = True
+                    # Maybe add flag later for ending
+                if boss3_spawn:
+                    enemy_attack = random.randint(20, 25)
+                    messages[11] = enemy_generate_attack_message(enemy_attack)
+                    counter = 0
+                    print("The boss3 spawn is " + str(boss3_spawn))
+
+        if active_message == 13 and boss3_spawn and test_flag and enemy_count == 14:
+            print("The boss 3 has died")
+            print("test")
+            boss3_dead = True
+            boss3_spawn = False
+            space_prompt = False
+            new_enemy = True
+            test_flag = False
+
+        if boss3_dead and active_message == 13:
+            print("close")
+            enemies_set2 = False
+            enemies_set3 = False
+            enemies = False
+            if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_BACKSPACE:
+                    active_message = 22
+                    message = messages[active_message]
+                    counter = 0
+                    end_game = True
+                    new_enemy = False
+                    enemyhp = 2
+                    enemyhp_show = False
+                    hp_show = False
+
+
 
 
         # Spacekey handling and hint prompt
         if event.type == pygame.KEYDOWN:
-            if event.key == pygame.K_SPACE and not hint_recieved:
+            if event.key == pygame.K_SPACE and not hint_recieved and knight or archer:
                 hint_recieved = True
-                print(hint_recieved)
-            if event.key == pygame.K_SPACE and not hp_info_prompt:
+
+            if event.key == pygame.K_SPACE and not hp_info_prompt and knight or archer:
                 hp_info_prompt = True
-                print(hp_info_prompt)
+
 
         if event.type == pygame.KEYDOWN:
             if event.key == pygame.K_SPACE:
@@ -556,9 +814,12 @@ while run:
                     archer = False
                     act_1 = False
 
+    if forest_bgshow:
+        screen.blit(forest_bg, (0, 100))
+
     if space_prompt:
         text_cont = game_font.render("> SPACE", True, (255, 255, 255))
-        screen.blit(text_cont, (625, 380))
+        screen.blit(text_cont, (625, 425))
         space_pressed = False
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -582,8 +843,6 @@ while run:
         test_infohp = game_font.render("Player Vitality", True, (255, 222, 38))
         screen.blit(test_infohp, (50, 350))
 
-
-
     if message_shown:
         button_active = True
         # Yes
@@ -602,33 +861,30 @@ while run:
         text_rect_6.y += 5
         screen.blit(text_surface_6, text_rect_6)
 
-    pygame.draw.rect(screen, rectbox_color, rectbox)
-    pygame.draw.rect(screen, outline_color_rectbox, rectbox, 2)
-
     # Player HP handling
     if hp_show:
         text_hp = game_font.render("HP: " + str(player_hp), True, (73, 209, 27)) # Default Green
-        screen.blit(text_hp, (50, 380))
+        screen.blit(text_hp, (50, 425))
     if player_hp < 71 and hp_show and knight:
         text_hp = game_font.render("HP: " + str(player_hp), True, (242, 221, 29)) # Yellow
-        screen.blit(text_hp, (50, 380))
+        screen.blit(text_hp, (50, 425))
     if player_hp < 31 and hp_show and knight:
         text_hp = game_font.render("HP: " + str(player_hp), True, (207, 0, 0)) # Red
-        screen.blit(text_hp, (50, 380))
+        screen.blit(text_hp, (50, 425))
     if player_hp < 41 and hp_show and archer:
         text_hp = game_font.render("HP: " + str(player_hp), True, (242, 221, 29))  # Yellow
-        screen.blit(text_hp, (50, 380))
+        screen.blit(text_hp, (50, 425))
     if player_hp < 26 and hp_show and archer:
         text_hp = game_font.render("HP: " + str(player_hp), True, (207, 0, 0))  # Red
-        screen.blit(text_hp, (50, 380))
+        screen.blit(text_hp, (50, 425))
 
 
     if enemyhp_show:
         enemy_text_hp = game_font.render("HP: " + str(enemyhp), True, (214, 4, 4))
-        screen.blit(enemy_text_hp, (350, 130))
+        screen.blit(enemy_text_hp, (350, 75))
     if enemyhp < 1:
         enemy_text_hp = game_font.render("SLAIN", True, (214, 4, 4))
-        screen.blit(enemy_text_hp, (350, 130))
+        screen.blit(enemy_text_hp, (350, 75))
         enemyhp_show = False
         space_prompt = False
     if player_dead:
@@ -637,7 +893,7 @@ while run:
         screen.blit(text_php, (50, 425))
         enemyhp_show = False
 
-    if not player_dead:
+    if not player_dead and not end_game:
         # Attack button
         pygame.draw.rect(screen, button_color, button_rect)
         pygame.draw.rect(screen, outline_color, button_rect, 3)  # Thickness of 3 pixels
@@ -667,7 +923,7 @@ while run:
         text_rect_3.y += 5
         screen.blit(text_surface_3, text_rect_3)
 
-        screen.blit(text_choose, (50, 370))
+        screen.blit(text_choose, (50, 400))
 
         # Archer
         pygame.draw.rect(screen, button_color_4, button_rect_4)
@@ -678,7 +934,9 @@ while run:
         screen.blit(text_surface_4, text_rect_4)
 
     snip = game_font.render(message[0:counter//speed], True, 'white')
-    text_rect = snip.get_rect(center=(screen.get_width() // 2, 100))
+    text_rect = snip.get_rect(center=(screen.get_width() // 2, 70))
+    if text_move:
+        text_rect = snip.get_rect(center=(screen.get_width() // 2, 50))
     screen.blit(snip, text_rect)
 
     pygame.display.flip()
