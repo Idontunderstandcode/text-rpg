@@ -286,6 +286,8 @@ while run:
         # After yes or no prompt, ready becomes false as a trigger for the transition to message to work.
         if event.type == pygame.MOUSEBUTTONDOWN:
             if button_rect_5.collidepoint(event.pos) and button_active:
+                pygame.mixer.music.load('Audio/ForestSoundtrack.mp3')
+                pygame.mixer.music.play(1)
                 active_message = 8
                 message = messages[active_message]
                 counter = 0
